@@ -1,0 +1,8 @@
+# Local-only additions. Activated through COMPOSE_FILE in .env (see .env.example),
+# Coolify never reads this file.
+services:
+  wordpress:
+    ports:
+      - "8080:80"
+    environment:
+      - WORDPRESS_URL=http://localhost:8080

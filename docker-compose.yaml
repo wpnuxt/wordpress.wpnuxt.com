@@ -1,0 +1,66 @@
+# Headless WordPress backend of the WPNuxt demo (demo.wpnuxt.com, docs, playgrounds, test fixtures)
+#
+# Coolify:  deploy this repository as a "Docker Compose" resource. Coolify picks up
+#           SERVICE_FQDN_WORDPRESS_80 (the site domain) and asks for the DB_* variables.
+# Locally:  cp .env.example .env  &&  docker compose up -d      (see README.md)
+#
+# WordPress core, plugins, themes and uploads live in the wordpress-html volume and are
+# updated through wp-admin, exactly as on the old host. There is no custom code to version:
+# the image only adds the reverse-proxy, PHP and wp-config settings from docker/.
+
+name: wpnuxt-wordpress
+
+services:
+  wordpress:
+    build: .
+    restart: unless-stopped
+    mem_limit: 1g
+    memswap_limit: 1g
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - SERVICE_FQDN_WORDPRESS_80
+      - WORDPRESS_URL=${WORDPRESS_URL:-https://wordpress.wpnuxt.com}
+      - WORDPRESS_DB_HOST=db
+      - WORDPRESS_DB_NAME=${DB_NAME:-wpnuxt}
+      - WORDPRESS_DB_USER=${DB_USER:-wpnuxt}
+      - WORDPRESS_DB_PASSWORD=${DB_PASSWORD:?DB_PASSWORD is not set}
+      - WORDPRESS_TABLE_PREFIX=wp_
+      - WORDPRESS_CONFIG_EXTRA=require '/usr/local/etc/wordpress/config-extra.php';
+      # Cache purge of the frontend on content changes (docker/mu-plugins/wpnuxt-revalidate.php)
+      - WPNUXT_REVALIDATE_URL=${WPNUXT_REVALIDATE_URL:-}
+      - WPNUXT_REVALIDATE_SECRET=${WPNUXT_REVALIDATE_SECRET:-}
+    volumes:
+      - wordpress-html:/var/www/html
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  db:
+    # MySQL, not MariaDB: the production database is MySQL 8, same engine as on the old host.
+    image: mysql:8.4
+    restart: unless-stopped
+    mem_limit: 1g
+    memswap_limit: 1g
+    environment:
+      - MYSQL_DATABASE=${DB_NAME:-wpnuxt}
+      - MYSQL_USER=${DB_USER:-wpnuxt}
+      - MYSQL_PASSWORD=${DB_PASSWORD:?DB_PASSWORD is not set}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD is not set}
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      # no credentials needed: "ping" only checks that the server accepts TCP connections
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  wordpress-html:
+  db-data:
