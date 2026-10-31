@@ -17,7 +17,7 @@ db="${2:-wpnuxt-wordpress-db-1}"
 
 echo "==> wp-content  ->  $wp:/var/www/html/wp-content"
 docker cp data/wp-content/. "$wp:/var/www/html/wp-content/"
-docker exec "$wp" chown -R www-data:www-data /var/www/html/wp-content
+docker exec -u root "$wp" chown -R www-data:www-data /var/www/html/wp-content
 
 echo "==> database  ->  $db"
 gunzip -c data/db.sql.gz | docker exec -i "$db" sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" exec mysql -u"$MYSQL_USER" "$MYSQL_DATABASE"'
