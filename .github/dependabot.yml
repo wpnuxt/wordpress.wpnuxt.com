@@ -1,0 +1,9 @@
+# The Dockerfile pins the wordpress base image by digest: Dependabot opens a PR when
+# Docker Hub publishes a new php8.5-apache build (PHP/Apache/Debian security fixes).
+# Merging it redeploys through Coolify with the new base image.
+version: 2
+updates:
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: daily

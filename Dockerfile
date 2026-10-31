@@ -1,6 +1,6 @@
 # Same PHP version as the old host; the WordPress version in the image is only used
 # to seed an empty volume, afterwards it updates itself from wp-admin.
-FROM wordpress:php8.5-apache
+FROM wordpress:php8.5-apache@sha256:63eda59d220083d9ed1fd9685ffdd5e0405959fd2fec73a734b631487561e12f
 
 # Real visitor IPs behind the Coolify (Traefik) reverse proxy, needed by Wordfence & co.
 COPY docker/remoteip.conf /etc/apache2/conf-available/remoteip.conf
