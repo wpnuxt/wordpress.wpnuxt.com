@@ -13,11 +13,8 @@ COPY docker/wp-config-extra.php /usr/local/etc/wordpress/config-extra.php
 COPY docker/mu-plugins/ /usr/local/share/wordpress-mu-plugins/
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
-# Run as www-data instead of root; an unprivileged user can't bind port 80, so Apache listens on 8080.
-RUN sed -i 's/^Listen 80$/Listen 8080/' /etc/apache2/ports.conf \
- && sed -i 's/<VirtualHost \*:80>/<VirtualHost *:8080>/' /etc/apache2/sites-available/000-default.conf
+# Run as www-data instead of root; docker-compose.yaml lets unprivileged users bind port 80 (sysctls)
 USER www-data
-EXPOSE 8080
 
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["apache2-foreground"]

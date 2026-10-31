@@ -3,6 +3,6 @@
 services:
   wordpress:
     ports:
-      - "8080:8080"
+      - "8080:80"
     environment:
       - WORDPRESS_URL=http://localhost:8080

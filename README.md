@@ -84,7 +84,7 @@ scripts/import.sh
    `openssl rand -hex 32`), and `WPNUXT_REVALIDATE_URL`/`WPNUXT_REVALIDATE_SECRET` (see
    *Frontend connection*). For a test deployment on another hostname set `WORDPRESS_URL` to that
    same URL.
-3. **Domain** of the `wordpress` service (Coolify sees `SERVICE_FQDN_WORDPRESS_8080`). Don't add `ports:`.
+3. **Domain** of the `wordpress` service (Coolify sees `SERVICE_FQDN_WORDPRESS_80`). Don't add `ports:`.
 4. **Deploy.** The first deployment builds the image and seeds an empty WordPress.
 5. **Load an existing site** (optional), from your machine. Container names change on every deploy:
    ```sh

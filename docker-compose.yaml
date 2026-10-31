@@ -1,7 +1,7 @@
 # Headless WordPress backend of the WPNuxt demo (demo.wpnuxt.com, docs, playgrounds, test fixtures)
 #
 # Coolify:  deploy this repository as a "Docker Compose" resource. Coolify picks up
-#           SERVICE_FQDN_WORDPRESS_8080 (the site domain) and asks for the DB_* variables.
+#           SERVICE_FQDN_WORDPRESS_80 (the site domain) and asks for the DB_* variables.
 # Locally:  cp .env.example .env  &&  docker compose up -d      (see README.md)
 #
 # WordPress core, plugins, themes and uploads live in the wordpress-html volume and are
@@ -16,11 +16,14 @@ services:
     restart: unless-stopped
     mem_limit: 1g
     memswap_limit: 1g
+    # Apache runs as www-data (Dockerfile); let it bind port 80 without root
+    sysctls:
+      - net.ipv4.ip_unprivileged_port_start=0
     depends_on:
       db:
         condition: service_healthy
     environment:
-      - SERVICE_FQDN_WORDPRESS_8080
+      - SERVICE_FQDN_WORDPRESS_80
       - WORDPRESS_URL=${WORDPRESS_URL:-https://wordpress.wpnuxt.com}
       - WORDPRESS_DB_HOST=db
       - WORDPRESS_DB_NAME=${DB_NAME:-wpnuxt}
@@ -34,7 +37,7 @@ services:
     volumes:
       - wordpress-html:/var/www/html
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8080/"]
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1/"]
       interval: 30s
       timeout: 10s
       retries: 5
